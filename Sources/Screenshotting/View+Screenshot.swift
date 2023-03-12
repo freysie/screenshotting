@@ -99,7 +99,7 @@ func saveScreenshot(
       //log("path = \(url.path), launchDate = \(launchDate)")
 
       let modifiedAt = try? FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date
-      if let modifiedAt, launchDate.timeIntervalSince(modifiedAt) < 10 {
+      if let modifiedAt, launchDate.timeIntervalSince(modifiedAt) < 30 {
         //log("modifiedAt = \(modifiedAt); Δ = \(launchDate.timeIntervalSince(modifiedAt))")
         //log("Too soon; skipping")
         continue
