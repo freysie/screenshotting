@@ -108,14 +108,16 @@ func saveScreenshot(
 
       //log("path = \(url.path), launchDate = \(launchDate)")
 
-      let modifiedAt = try? FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date
-      if let modifiedAt, launchDate.timeIntervalSince(modifiedAt) < 30 {
-        //log("modifiedAt = \(modifiedAt); Δ = \(launchDate.timeIntervalSince(modifiedAt))")
-        //log("Too soon; skipping")
-        continue
+      if isXcodeRunningForPreviews {
+        let modifiedAt = try? FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date
+        if let modifiedAt, launchDate.timeIntervalSince(modifiedAt) < 30 {
+          //log("modifiedAt = \(modifiedAt); Δ = \(launchDate.timeIntervalSince(modifiedAt))")
+          //log("Too soon; skipping")
+          continue
+        }
       }
 
-      let window = NSWindow(view: view, screen: screen)
+      let window = ScreenshottingWindow(view: view, screen: screen)
       //window.appearance = window.effectiveAppearance.applyingTintColor(.controlAccentPink)
       //window.appearance = NSAppearance(named: window.effectiveAppearance.name)!.applyingTintColor(.controlAccentPink)!
       //window.appearance = appearance.applyingTintColor(.controlAccentPink)!
@@ -131,7 +133,10 @@ func saveScreenshot(
       if window.responds(to: Selector(("uv_acquireKeyAppearance"))) {
         window.perform(Selector(("uv_acquireKeyAppearance")))
       }
-      window.makeKeyAndOrderFront(nil)
+      //window.makeKeyAndOrderFront(nil)
+      //window.makeMain()
+      window.makeKey()
+      window.orderFrontRegardless()
 
       DispatchQueue.main.async {
         //              //              NSAppearance.currentDrawing().applyingTintColor(NSColor.controlAccentPink)?.performAsCurrentDrawingAppearance {
@@ -218,4 +223,8 @@ extension NSWindow {
     contentViewController = hostingController
     setContentSize(hostingController.view.intrinsicContentSize)
   }
+}
+
+class ScreenshottingWindow: NSWindow {
+  override func selectNextKeyView(_ sender: Any?) {}
 }
