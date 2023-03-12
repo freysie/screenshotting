@@ -8,7 +8,7 @@ import Screenshotting
 //  }
 //}
 
-class DirectCaptureExample_Previews: PreviewProvider, ScreenshotProvider {
+struct DirectCaptureExample_Previews: PreviewProvider {
   static var previews: some View {
     FormExample()
       .padding(5)

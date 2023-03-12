@@ -14,7 +14,7 @@ struct ContentView: View {
 }
 
 @available(macOS 13.0, *)
-class ContentView_Previews: PreviewProvider, ScreenshotProvider {
+class ContentView_Previews: PreviewProvider {
   static var previews: some View {
 //    ContentView()
 //        .background()

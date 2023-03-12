@@ -6,12 +6,15 @@ import SwiftUI
 import ScreenshottingWatchSupport
 #endif
 
-struct ScreenshotPreviewContext: PreviewContext {
-  subscript<Key>(key: Key.Type) -> Key.Value where Key: PreviewContextKey { Key.defaultValue }
-
+struct ScreenshotContext {
   var name: String?
   var colorScheme: ColorScheme?
   var scale: CGFloat?
+  var filePath: String
+}
+
+extension ScreenshotContext: PreviewContext {
+  subscript<Key>(key: Key.Type) -> Key.Value where Key: PreviewContextKey { Key.defaultValue }
 }
 
 public extension View {
@@ -21,10 +24,13 @@ public extension View {
     scale: CGFloat? = nil,
     filePath: String = #filePath
   ) -> some View {
-    let context = ScreenshotPreviewContext(
+    //log("\(self)")
+    //let selfString = "\(self)"
+    let context = ScreenshotContext(
       name: name,
       colorScheme: colorScheme,
-      scale: scale
+      scale: scale,
+      filePath: filePath
     )
 
     return Group {
@@ -32,15 +38,16 @@ public extension View {
         previewContext(context)
       } else {
         overlay {
-          _WindowReader { previewWindow in
-            guard isXcodeRunningForPreviews else { return }
-
-            saveScreenshot(
-              for: previewWindow,
-              view: AnyView(self),
-              filePath: filePath,
-              context: context
-            )
+          _WindowReader {
+//            print(allPreviewProviders as NSArray)
+//            for provider in allPreviewProviders {
+//              for preview in provider._allPreviews {
+//                //log(preview.displayName)
+//                log("\(String(describing: preview.content))")
+//                log("\(String(describing: preview.content) == selfString)")
+//              }
+//            }
+            saveScreenshot(for: $0, view: AnyView(self), context: context)
           }
         }
       }
@@ -80,10 +87,9 @@ func projectDirectoryPath(for filePath: String, fileManager: FileManager = .defa
 }
 
 func saveScreenshot(
-  for previewWindow: NSWindow,
+  for previewWindow: NSWindow? = nil,
   view: AnyView,
-  filePath: String,
-  context: ScreenshotPreviewContext
+  context: ScreenshotContext
 ) {
   for appearance in [NSAppearance(named: .aqua)!, NSAppearance(named: .darkAqua)!] {
     for screen in NSScreen.screens.uniqued(by: \.backingScaleFactor) {
@@ -98,7 +104,7 @@ func saveScreenshot(
       ]
 
       let filename = "\(name.compactMap { $0 }.joined()).png"
-      let url = URL(fileURLWithPath: outputDirectoryPath(for: filePath)).appendingPathComponent(filename)
+      let url = URL(fileURLWithPath: outputDirectoryPath(for: context.filePath)).appendingPathComponent(filename)
 
       //log("path = \(url.path), launchDate = \(launchDate)")
 
@@ -114,10 +120,18 @@ func saveScreenshot(
       //window.appearance = NSAppearance(named: window.effectiveAppearance.name)!.applyingTintColor(.controlAccentPink)!
       //window.appearance = appearance.applyingTintColor(.controlAccentPink)!
       window.appearance = appearance
-      window.setContentSize(previewWindow.frame.size)
+      //NSApp.appearance = appearance
+      if let previewWindow {
+        window.setContentSize(previewWindow.frame.size)
+      }
       //log("\(window)")
-      window.perform(Selector(("uv_acquireMainAppearance")))
-      window.perform(Selector(("uv_acquireKeyAppearance")))
+      if window.responds(to: Selector(("uv_acquireMainAppearance"))) {
+        window.perform(Selector(("uv_acquireMainAppearance")))
+      }
+      if window.responds(to: Selector(("uv_acquireKeyAppearance"))) {
+        window.perform(Selector(("uv_acquireKeyAppearance")))
+      }
+      window.makeKeyAndOrderFront(nil)
 
       DispatchQueue.main.async {
         //              //              NSAppearance.currentDrawing().applyingTintColor(NSColor.controlAccentPink)?.performAsCurrentDrawingAppearance {

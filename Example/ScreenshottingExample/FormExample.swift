@@ -64,9 +64,9 @@ class FormExample_Previews: PreviewProvider {
     //CaptureScreenshots(fromXcode: true) {
       FormExample()
         .padding()
-        //.background()
-        //.previewLayout(.sizeThatFits)
-        .screenshot("Form")
+        .background()
+        .previewLayout(.sizeThatFits)
+        .screenshot("Form5")
       //.screenshot("OmgWut")
     //}
   }
