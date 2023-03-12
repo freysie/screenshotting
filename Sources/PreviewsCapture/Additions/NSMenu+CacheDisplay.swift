@@ -1,7 +1,6 @@
 #if os(macOS)
 
 import AppKit
-import ScreenshottingObjC
 
 extension NSMenu {
   class WindowGetter: NSView {

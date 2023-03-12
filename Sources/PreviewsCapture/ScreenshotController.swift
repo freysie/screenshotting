@@ -1,5 +1,4 @@
 import SwiftUI
-import ScreenshottingObjC
 
 @objcMembers public class ScreenshotController {
   public static let shared = ScreenshotController()

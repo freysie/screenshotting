@@ -13,8 +13,12 @@ let package = Package(
     .library(name: "ScreenshottingRNG", targets: ["ScreenshottingRNG"]),
   ],
   targets: [
-    .target(name: "Screenshotting", dependencies: ["ScreenshottingObjC"]),
-    .target(name: "ScreenshottingObjC", publicHeadersPath: "."),
+    .target(name: "Screenshotting", dependencies: [
+      //.target(name: "ScreenshottingUtilities", condition: .when(platforms: [.macOS])),
+      .target(name: "ScreenshottingWatchSupport", condition: .when(platforms: [.watchOS])),
+    ]),
     .target(name: "ScreenshottingRNG"),
+    //.target(name: "ScreenshottingUtilities", publicHeadersPath: "."),
+    .target(name: "ScreenshottingWatchSupport", publicHeadersPath: "."),
   ]
 )

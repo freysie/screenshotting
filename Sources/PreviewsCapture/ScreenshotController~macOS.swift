@@ -2,7 +2,7 @@
 
 import AppKit
 import SwiftUI
-import ScreenshottingObjC
+//import ScreenshottingUtilities
 
 public extension ScreenshotController {
   @MainActor func _saveAll() async {

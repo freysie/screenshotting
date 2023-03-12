@@ -1,5 +1,3 @@
-#include <TargetConditionals.h>
-
 #if __has_include(<UIKit/UIKit.h>)
 
 @import UIKit;

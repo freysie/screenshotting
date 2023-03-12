@@ -2,7 +2,7 @@
 
 import SwiftUI
 import WatchKit
-import ScreenshottingObjC
+import ScreenshottingWatchSupport
 
 public extension ScreenshotController {
   @MainActor func _saveAll() async {

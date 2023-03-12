@@ -1,7 +1,6 @@
 #if os(iOS)
 
 import SwiftUI
-import ScreenshottingObjC
 
 // TODO: try adding explicit scale support (via `UIGraphicsImageRendererFormat.scale`)
 

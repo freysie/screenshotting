@@ -1,6 +1,10 @@
 import AppKit
 import SwiftUI
-import ScreenshottingObjC
+#if os(macOS)
+//import ScreenshottingUtilities
+#elseif os(watchOS)
+import ScreenshottingWatchSupport
+#endif
 
 struct ScreenshotPreviewContext: PreviewContext {
   subscript<Key>(key: Key.Type) -> Key.Value where Key: PreviewContextKey { Key.defaultValue }
@@ -17,34 +21,36 @@ public extension View {
     scale: CGFloat? = nil,
     filePath: String = #filePath
   ) -> some View {
+    let context = ScreenshotPreviewContext(
+      name: name,
+      colorScheme: colorScheme,
+      scale: scale
+    )
+
+    return Group {
+      if !isXcodeRunningForPreviews {
+        previewContext(context)
+      } else {
+        overlay {
+          _WindowReader { previewWindow in
+            guard isXcodeRunningForPreviews else { return }
+
+            saveScreenshot(
+              for: previewWindow,
+              view: AnyView(self),
+              filePath: filePath,
+              context: context
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
 //    let dateFormatter = DateFormatter()
 //    dateFormatter.locale = .autoupdatingCurrent
 //    dateFormatter.dateFormat = "yyyy-MM-dd 'at' h:MM:ss a"
-
-    return self
-      .previewContext(
-        ScreenshotPreviewContext(
-          name: name,
-          colorScheme: colorScheme,
-          scale: scale
-        )
-      )
-      .overlay {
-        _WindowReader { previewWindow in
-          guard isXcodeRunningForPreviews else { return }
-
-          saveScreenshot(
-            for: previewWindow,
-            view: AnyView(self),
-            name: name,
-            colorScheme: colorScheme,
-            scale: scale,
-            filePath: filePath
-          )
-        }
-      }
-  }
-}
 
 func outputDirectoryPath(for filePath: String) -> String {
   projectDirectoryPath(for: filePath) ?? screenCaptureLocation ?? "~/Desktop"
@@ -76,18 +82,16 @@ func projectDirectoryPath(for filePath: String, fileManager: FileManager = .defa
 func saveScreenshot(
   for previewWindow: NSWindow,
   view: AnyView,
-  name: String,
-  colorScheme: ColorScheme? = nil,
-  scale: CGFloat? = nil,
-  filePath: String
+  filePath: String,
+  context: ScreenshotPreviewContext
 ) {
   for appearance in [NSAppearance(named: .aqua)!, NSAppearance(named: .darkAqua)!] {
     for screen in NSScreen.screens.uniqued(by: \.backingScaleFactor) {
-      if let scale, scale != screen.backingScaleFactor { continue }
-      if let colorScheme, colorScheme.nsAppearanceName != appearance.name { continue }
+      if let scale = context.scale, scale != screen.backingScaleFactor { continue }
+      if let colorScheme = context.colorScheme, colorScheme.nsAppearanceName != appearance.name { continue }
 
       let name = [
-        name,
+        context.name,
         //window.effectiveAppearance.name.suffix,
         appearance.name.suffix,
         "@\(Int(screen.backingScaleFactor))x"
@@ -108,7 +112,8 @@ func saveScreenshot(
       let window = NSWindow(view: view, screen: screen)
       //window.appearance = window.effectiveAppearance.applyingTintColor(.controlAccentPink)
       //window.appearance = NSAppearance(named: window.effectiveAppearance.name)!.applyingTintColor(.controlAccentPink)!
-      window.appearance = appearance.applyingTintColor(.controlAccentPink)!
+      //window.appearance = appearance.applyingTintColor(.controlAccentPink)!
+      window.appearance = appearance
       window.setContentSize(previewWindow.frame.size)
       //log("\(window)")
       window.perform(Selector(("uv_acquireMainAppearance")))
