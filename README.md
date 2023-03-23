@@ -1,8 +1,6 @@
 # Screenshotting
 
-Save screenshots of views on macOS, iOS<!--, tvOS-->, and watchOS<!--, and xrOS-->.
-
-Have you ever wanted automatically-updating screenshots for your README files? Now you can!
+Have you ever wanted to have automatically-updating screenshots for your README files? Now you can!
 
 <!--![](Screenshots/Screenshotting.png)-->
 
